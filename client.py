@@ -8,13 +8,16 @@ client.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 # initiates client/server connection
 client.connect(("127.0.0.1", 5000))
 
+
 gameMode = False
 game = ''
 message = ''
 response = ''
 restart = False
+indicies = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
+invalidMessage = False
 while True:
-    # starts game
+    # starts game logic
     if response == 'tic-tac-toe':
         game = TicTacToe('client', 'server')
         print('Server started Tic-Tac-Toe, you go first')
@@ -35,34 +38,57 @@ while True:
         response = response.decode()
         print('Server sent -> ' + response)
 
+    # In gameMode
     if gameMode:
-        # client's turn
-        print(game.printBoard())
-        index = input("Enter Game Input -> ")
-        game.setValue(int(index), "client")
-        message = game.printBoard()
-        client.send(message.encode())
+        # if server input invalid
+        if invalidMessage:
+            res = 'Invalid input. Please enter number 1-9 that has not been selected'
+            client.send(res.encode())
+        else:
+            # client's turn
+            print(game.printBoard())
+            index = input("Enter Game Input -> ")
+            # validate client input
+            while index not in indicies:
+                print("Invalid input. Please enter number 1-9 that has not been selected")
+                index = input("Enter Game Input -> ")
+            # set board
+            game.setValue(int(index), "client")
+            # remove index from list
+            indicies[int(index) - 1] = ''
+            message = game.printBoard()
+            client.send(message.encode())
+
+        invalidMessage = False
 
         # client wins
         if game.checkWinner():
             print("Congrats you won!")
             gameMode = False
             restart = True
+            indicies = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
 
         # Servers turn
         if gameMode:
             response = client.recv(4096)
             response = response.decode()
-            game.setValue(int(response), 'server')
-            print('Server sent -> ' + response)
+            # activate invalid message logic
+            if response not in indicies:
+                invalidMessage = True
+            if not invalidMessage:
+                # set board and remove index from list
+                game.setValue(int(response), 'server')
+                indicies[int(response) - 1] = ''
+                print('Server sent -> ' + response)
 
-            # server wins
-            if game.checkWinner():
-                print("Bummer, server won!")
-                message = 'Congrats you won!' + "\n" + game.printBoard()
-                client.send(message.encode())
-                gameMode = False
-                restart = True
+                # server wins
+                if game.checkWinner():
+                    print("Bummer, server won!")
+                    message = 'Congrats you won!' + "\n" + game.printBoard()
+                    client.send(message.encode())
+                    gameMode = False
+                    restart = True
+                    indicies = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
 
     # if server quits
     if response == '/q':

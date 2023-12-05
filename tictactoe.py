@@ -78,3 +78,8 @@ class TicTacToe:
 #
 # r.setValue(3, "server")
 # print(r.printBoard())
+#
+# board = r.printBoard()
+# for x in board:
+#     print(x, 'line')
+
