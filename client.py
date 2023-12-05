@@ -16,6 +16,10 @@ response = ''
 restart = False
 indicies = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
 invalidMessage = False
+
+print("\n \n Welcome to Roberts Chat Server! \n Client starts the chat \n Chat back and forth until you hearts content."
+      "To quit enter '/q' \n To play Tic-Tac-Toe enter 'tic-tac-toe' \n Once you start a game you must finish it. "
+      "Enter the number of the space that corresponds to where you want to mark. \n Have Fun! \n \n")
 while True:
     # starts game logic
     if response == 'tic-tac-toe':
